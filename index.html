@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shared Power Bill Splitter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Shared Electricity Bill Calculator</h1>
+        <p class="subtitle">A reliable mathematical system to share apartment energy differences smoothly and accurately.</p>
+    </header>
+
+    <div class="error-message" id="errorBox"></div>
+
+    <!-- Wrapped inside a form to natively catch the "Enter" keypress across all browsers -->
+    <form id="calcForm" onsubmit="calculateLiability(event)">
+        <div class="input-grid">
+            <div class="input-group">
+                <label for="mainBill">Total Main Bill Amount</label>
+                <input type="number" id="mainBill" placeholder="0.00" step="0.01">
+            </div>
+            <div class="input-group">
+                <label for="gndMeter">Ground Floor Submeter</label>
+                <input type="number" id="gndMeter" placeholder="0.00" step="0.01">
+            </div>
+            <div class="input-group">
+                <label for="firstMeter">First Floor Submeter</label>
+                <input type="number" id="firstMeter" placeholder="0.00" step="0.01">
+            </div>
+        </div>
+
+        <!-- Button type set to "submit" triggers calculation via click or Enter key -->
+        <button type="submit">Calculate Shared Split</button>
+    </form>
+
+    <div class="output-section" id="outputSection">
+        <div class="results-box">
+            <div class="results-header">
+                <div class="results-title">Calculated Shares</div>
+                <button type="button" class="help-btn" onclick="toggleModal(true)">What is a Proportional Split?</button>
+            </div>
+            <div class="result-row">
+                <span>Ground Floor Total to Pay:</span>
+                <span class="result-value" id="resGnd">0.00</span>
+            </div>
+            <div class="result-row">
+                <span>First Floor Total to Pay:</span>
+                <span class="result-value" id="resFirst">0.00</span>
+            </div>
+        </div>
+
+        <div class="explanation-section">
+            <h2>Step-by-Step Math Breakdown</h2>
+
+            <!-- Step 1 -->
+            <div class="step-block">
+                <div class="step-title">Step 1: Finding the Unmetered Difference (ΔB)</div>
+                <div class="formula-box">ΔB = B_Main - (M_Gnd + M_1st)</div>
+                <div class="step-desc">This finds the small difference between the master meter and the submeters. This difference happens naturally in all buildings because tiny amounts of power are lost as heat in the shared lines (line loss), and submeters require a fraction of power to stay operational.</div>
+                <div class="math-execution" id="calcStep1"></div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="step-block">
+                <div class="step-title">Step 2: Total Recorded Submeter Consumption (M_Total)</div>
+                <div class="formula-box">M_Total = M_Gnd + M_1st</div>
+                <div class="step-desc">This sums up the baseline readings from both submeters to see how much total consumption was recorded individually by both floors.</div>
+                <div class="math-execution" id="calcStep2"></div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="step-block">
+                <div class="step-title">Step 3: Calculating Ground Floor Total Share (C_Gnd)</div>
+                <div class="formula-box">C_Gnd = M_Gnd + ((M_Gnd / M_Total) * ΔB)</div>
+                <div class="step-desc">The Ground Floor covers its direct submeter usage, plus its matching percentage of the shared delivery difference based directly on its share of that month's usage pool.</div>
+                <div class="math-execution" id="calcStep3"></div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="step-block">
+                <div class="step-title">Step 4: Calculating First Floor Total Share (C_1st)</div>
+                <div class="formula-box">C_1st = M_1st + ((M_1st / M_Total) * ΔB)</div>
+                <div class="step-desc">The First Floor covers its direct submeter usage, plus its matching percentage of the shared delivery difference based directly on its share of that month's usage pool.</div>
+                <div class="math-execution" id="calcStep4"></div>
+            </div>
+
+            <div class="step-block verify">
+                <div class="step-title">Step 5: System Check (Accuracy Verification)</div>
+                <div class="formula-box">ΣC = C_Gnd + C_1st ≡ B_Main</div>
+                <div class="step-desc">A final verification showing that when the two calculated shares are added back together, they equal the exact master bill down to the last decimal point. The math balances perfectly with no overlap.</div>
+                <div class="math-execution" id="calcStep5"></div>
+            </div>
+        </div>
+
+        <div class="rationale-box">
+            <div class="rationale-title">Why this method is chosen (The Science)</div>
+            <div class="rationale-text">
+                The tiny gap between a main digital meter and individual submeters is governed by <strong>Joule's First Law (P = I²R)</strong>, which states that all electrical wiring naturally dissipates a small fraction of energy as heat. Because both floors share a compact vertical property, the line length and resistance properties are effectively uniform (R_Ground ≈ R_First). <br><br>
+                Because current is <strong>squared (I²)</strong> in physics, the heat generated inside the distribution lines naturally dynamically shifts depending on the live electrical draw of the building. Splitting the cost differences on a rigid 50/50 basis doesn't account for how electricity behaves, as it could unintentionally favor one floor over the other depending on seasonal appliance use. <br><br>
+                Using a <strong>proportional usage split</strong> scales the shared overhead smoothly against each floor's active consumption. It ensures a transparent, mathematically consistent method where both floors contribute to the shared infrastructure in perfect alignment with how the system physically ran.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Overlay Box for Explanation with Friendly Carpool Analogy -->
+<div class="modal-overlay" id="helpModal" onclick="toggleModal(false)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h3>Understanding Proportional Splits</h3>
+        <p>A <strong>Usage-Based Proportional Split</strong> simply means sharing any common system overhead based on how much total energy each floor used.</p>
+        <p>Think of it like a shared road trip carpool:</p>
+        <ul>
+            <li>Two people drive together to a destination, but one person gets dropped off halfway down the road while the other keeps driving to the final stop.</li>
+            <li>Splitting the total fuel cost exactly 50/50 wouldn't match the actual distance each person traveled in the vehicle. The fairest approach is to distribute the fuel cost based on each passenger's percentage of the total trip distance.</li>
+        </ul>
+        <p>Because the main smart meter captures tiny building-wide overheads (like wire heat losses) that individual submeters don't record, this calculator balances the difference using your exact monthly usage percentages. This ensures both floors share the bill accurately, predictably, and completely in sync with how the system physically ran.</p>
+        <button class="close-modal-btn" onclick="toggleModal(false)">Got It</button>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
