@@ -42,13 +42,18 @@ function calculateLiability(event) {
     const deltaB = bMain - mTotal;
 
     if (deltaB < 0) {
-        showError(`Notice: Combined submeter readings (${mTotal.toFixed(2)}) cannot exceed the main meter bill (${bMain.toFixed(2)}). Please verify values.`);
+        showError("Notice: Combined submeter readings (" + mTotal.toFixed(2) + ") cannot exceed the main meter bill (" + bMain.toFixed(2) + "). Please verify values.");
         return;
     }
 
     if (mTotal === 0) {
         showError("Calculation Stopped: Submeter consumption entries cannot be zero.");
         return;
+    }
+
+    // Input eligible for calculation: dismiss mobile virtual keyboard instantly
+    if (document.activeElement && typeof document.activeElement.blur === 'function') {
+        document.activeElement.blur();
     }
 
     // Gracefully fade and slide the error box away if parameters match rules
